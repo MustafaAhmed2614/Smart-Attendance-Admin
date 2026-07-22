@@ -23,4 +23,39 @@ class ApiService {
       throw Exception('Error connecting to backend: $e');
     }
   }
+
+  // Function to register a new student with image
+  Future<Map<String, dynamic>> registerStudent({
+    required String rollNumber,
+    required String name,
+    required dynamic imageFile, // Uint8Bytes for Flutter Web compatibility
+    required String fileName,
+  }) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/register-student'),
+      );
+
+      // Adding text fields
+      request.fields['roll_number'] = rollNumber;
+      request.fields['name'] = name;
+
+      // Adding image file for web
+      request.files.add(
+        http.MultipartFile.fromBytes('image', imageFile, filename: fileName),
+      );
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to register student: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error connecting to backend: $e');
+    }
+  }
 }
