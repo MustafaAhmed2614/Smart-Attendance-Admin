@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Base URL for your local FastAPI backend
+  // Base URL for local FastAPI backend
   static const String baseUrl = 'http://127.0.0.1:8000/admin';
 
-  // 1. Fetch Stats for Dashboard Cards
+  // 1. Fetch Dashboard Stats
   Future<Map<String, dynamic>> getDashboardStats() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/stats'));
@@ -38,7 +38,25 @@ class ApiService {
     }
   }
 
-  // 3. Register Student with Image
+  // 3. Fetch All Students List
+  Future<List<dynamic>> getStudents() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/students'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'Success') {
+          return data['students'];
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching students: $e');
+      return [];
+    }
+  }
+
+  // 4. Register Student with Image
   Future<Map<String, dynamic>> registerStudent({
     required String rollNumber,
     required String name,
