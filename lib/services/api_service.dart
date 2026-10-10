@@ -56,7 +56,45 @@ class ApiService {
     }
   }
 
-  // 4. Register Student with Image
+  // 4. Fetch Attendance Reports Logs
+  Future<List<dynamic>> getAttendanceReports() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/reports'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          return data['data'];
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching reports: $e');
+      return [];
+    }
+  }
+
+  // 5. Fetch Individual Student Detail & Logs
+  Future<Map<String, dynamic>> getStudentDetail(String rollNumber) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/student-detail/$rollNumber'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          return data;
+        }
+      }
+      return {};
+    } catch (e) {
+      print('Error fetching student detail: $e');
+      return {};
+    }
+  }
+
+  // 6. Register Student with Image
   Future<Map<String, dynamic>> registerStudent({
     required String rollNumber,
     required String name,
