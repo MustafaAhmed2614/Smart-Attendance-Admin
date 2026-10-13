@@ -35,6 +35,12 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final imageName = _studentData['image_filename'];
+    int totalClasses =
+        20; // Assume total semester classes for ratio calculation
+    int attended = _logs.length;
+    int absent = totalClasses > attended ? totalClasses - attended : 0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('${_studentData['name'] ?? 'Student'} Profile & Analytics'),
@@ -47,7 +53,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Left Side: Profile & Chart
+                  // Left Side: Profile & Circular Pie Chart
                   Expanded(
                     flex: 1,
                     child: Column(
@@ -72,17 +78,25 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                                 backgroundColor: const Color(
                                   0xFF4318FF,
                                 ).withOpacity(0.1),
-                                child: Text(
-                                  (_studentData['name'] != null &&
-                                          _studentData['name'].isNotEmpty)
-                                      ? _studentData['name'][0].toUpperCase()
-                                      : 'S',
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF4318FF),
-                                  ),
-                                ),
+                                backgroundImage: imageName != null
+                                    ? NetworkImage(
+                                        'http://127.0.0.1:8000/admin/student-images/$imageName',
+                                      )
+                                    : null,
+                                child: imageName == null
+                                    ? Text(
+                                        (_studentData['name'] != null &&
+                                                _studentData['name'].isNotEmpty)
+                                            ? _studentData['name'][0]
+                                                  .toUpperCase()
+                                            : 'S',
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF4318FF),
+                                        ),
+                                      )
+                                    : null,
                               ),
                               const SizedBox(width: 15),
                               Expanded(
@@ -120,7 +134,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  'Total: ${_logs.length}',
+                                  'Total: $attended',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF4318FF),
@@ -132,7 +146,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                         ),
                         const SizedBox(height: 20),
 
-                        // Attendance Chart Container
+                        // Circular Pie Chart Container
                         Expanded(
                           child: Container(
                             padding: const EdgeInsets.all(20),
@@ -150,7 +164,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
-                                  'Attendance Overview',
+                                  'Attendance Ratio (Present vs Absent)',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -165,88 +179,68 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                                             'Chart ke liye data mojood nahi hai.',
                                           ),
                                         )
-                                      : BarChart(
-                                          BarChartData(
-                                            borderData: FlBorderData(
-                                              show: false,
-                                            ),
-                                            titlesData: FlTitlesData(
-                                              leftTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: false,
+                                      : PieChart(
+                                          PieChartData(
+                                            sectionsSpace: 4,
+                                            centerSpaceRadius: 40,
+                                            sections: [
+                                              PieChartSectionData(
+                                                color: Colors.green,
+                                                value: attended.toDouble(),
+                                                title: '$attended',
+                                                radius: 50,
+                                                titleStyle: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
                                                 ),
                                               ),
-                                              topTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: false,
+                                              PieChartSectionData(
+                                                color: Colors.redAccent,
+                                                value: absent.toDouble(),
+                                                title: '$absent',
+                                                radius: 45,
+                                                titleStyle: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
                                                 ),
                                               ),
-                                              rightTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: false,
-                                                ),
-                                              ),
-                                              bottomTitles: AxisTitles(
-                                                sideTitles: SideTitles(
-                                                  showTitles: true,
-                                                  getTitlesWidget: (value, meta) {
-                                                    int index = value.toInt();
-                                                    if (index >= 0 &&
-                                                        index < _logs.length) {
-                                                      String date =
-                                                          _logs[index]['date'] ??
-                                                          '';
-                                                      if (date.length >= 10) {
-                                                        date = date.substring(
-                                                          5,
-                                                        );
-                                                      }
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                              top: 8.0,
-                                                            ),
-                                                        child: Text(
-                                                          date,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 10,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ),
-                                                        ),
-                                                      );
-                                                    }
-                                                    return const Text('');
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                            barGroups: List.generate(
-                                              _logs.length > 7
-                                                  ? 7
-                                                  : _logs.length,
-                                              (index) {
-                                                return BarChartGroupData(
-                                                  x: index,
-                                                  barRods: [
-                                                    BarChartRodData(
-                                                      toY: 1,
-                                                      color: const Color(
-                                                        0xFF4318FF,
-                                                      ),
-                                                      width: 16,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            4,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            ),
+                                            ],
                                           ),
                                         ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(
+                                      Icons.circle,
+                                      color: Colors.green,
+                                      size: 12,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'Present',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    SizedBox(width: 20),
+                                    Icon(
+                                      Icons.circle,
+                                      color: Colors.redAccent,
+                                      size: 12,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'Absent/Remaining',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

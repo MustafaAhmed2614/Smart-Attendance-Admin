@@ -9,7 +9,6 @@ class ApiService {
   Future<Map<String, dynamic>> getDashboardStats() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/stats'));
-
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
@@ -24,7 +23,6 @@ class ApiService {
   Future<List<dynamic>> getWeeklyStats() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/weekly-stats'));
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'Success') {
@@ -42,7 +40,6 @@ class ApiService {
   Future<List<dynamic>> getStudents() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/students'));
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'Success') {
@@ -60,7 +57,6 @@ class ApiService {
   Future<List<dynamic>> getAttendanceReports() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/reports'));
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'success') {
@@ -80,7 +76,6 @@ class ApiService {
       final response = await http.get(
         Uri.parse('$baseUrl/student-detail/$rollNumber'),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'success') {
@@ -98,7 +93,7 @@ class ApiService {
   Future<Map<String, dynamic>> registerStudent({
     required String rollNumber,
     required String name,
-    required dynamic imageFile, // Uint8List for Web
+    required dynamic imageFile,
     required String fileName,
   }) async {
     try {
@@ -106,10 +101,8 @@ class ApiService {
         'POST',
         Uri.parse('$baseUrl/register-student'),
       );
-
       request.fields['roll_number'] = rollNumber;
       request.fields['name'] = name;
-
       request.files.add(
         http.MultipartFile.fromBytes('image', imageFile, filename: fileName),
       );
@@ -127,7 +120,7 @@ class ApiService {
     }
   }
 
-  // 7. Fetch All Courses (Inside Class)
+  // 7. Fetch All Courses
   Future<List<dynamic>> getCourses() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/courses'));
@@ -144,7 +137,7 @@ class ApiService {
     }
   }
 
-  // 8. Fetch Students Enrolled in a Specific Course (Inside Class)
+  // 8. Fetch Students Enrolled in a Specific Course
   Future<List<dynamic>> getCourseStudents(String courseName) async {
     try {
       final response = await http.get(
@@ -159,6 +152,23 @@ class ApiService {
       return [];
     } catch (e) {
       print('Error fetching course students: $e');
+      return [];
+    }
+  }
+
+  // 9. Fetch Low Attendance Defaulters List
+  Future<List<dynamic>> getDefaulters() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/defaulters'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          return data['defaulters'];
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching defaulters: $e');
       return [];
     }
   }
