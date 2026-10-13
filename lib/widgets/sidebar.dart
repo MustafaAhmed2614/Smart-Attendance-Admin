@@ -3,6 +3,8 @@ import '../screens/dashboard_screen.dart';
 import '../screens/manage_students_screen.dart';
 import '../screens/students_list_screen.dart'; // Nayi screen ka import
 import '../screens/reports_screen.dart';
+import '../screens/courses_screen.dart';
+
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
 
@@ -103,6 +105,23 @@ class Sidebar extends StatelessWidget {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const ReportsScreen()),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.book_rounded, color: Colors.white70),
+            title: const Text(
+              'Courses',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const CoursesScreen()),
               );
             },
           ),

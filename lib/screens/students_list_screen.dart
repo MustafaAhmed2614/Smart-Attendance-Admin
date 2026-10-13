@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/sidebar.dart';
 import '../services/api_service.dart';
-import 'student_detail_screen.dart'; // Student detail screen ka import
+import 'student_detail_screen.dart';
 
 class StudentsListScreen extends StatefulWidget {
   const StudentsListScreen({super.key});
@@ -80,8 +80,9 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                             itemCount: students.length,
                             itemBuilder: (context, index) {
                               final student = students[index];
+                              final imageName = student['image_filename'];
+
                               return ListTile(
-                                // 🚀 Yahan tap action add kar diya gaya hai
                                 onTap: () {
                                   Navigator.push(
                                     context,
@@ -93,19 +94,30 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                                   );
                                 },
                                 leading: CircleAvatar(
+                                  radius: 25,
                                   backgroundColor: const Color(
                                     0xFF4318FF,
                                   ).withOpacity(0.1),
-                                  child: Text(
-                                    student['name'][0].toUpperCase(),
-                                    style: const TextStyle(
-                                      color: Color(0xFF4318FF),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                  backgroundImage: imageName != null
+                                      ? NetworkImage(
+                                          'http://127.0.0.1:8000/admin/student-images/$imageName',
+                                        )
+                                      : null,
+                                  child: imageName == null
+                                      ? Text(
+                                          (student['name'] != null &&
+                                                  student['name'].isNotEmpty)
+                                              ? student['name'][0].toUpperCase()
+                                              : 'S',
+                                          style: const TextStyle(
+                                            color: Color(0xFF4318FF),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null,
                                 ),
                                 title: Text(
-                                  student['name'],
+                                  student['name'] ?? 'Unknown',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF2B3674),

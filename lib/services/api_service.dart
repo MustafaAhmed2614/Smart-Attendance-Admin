@@ -126,4 +126,40 @@ class ApiService {
       throw Exception('Error connecting to backend: $e');
     }
   }
+
+  // 7. Fetch All Courses (Inside Class)
+  Future<List<dynamic>> getCourses() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/courses'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          return data['courses'];
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching courses: $e');
+      return [];
+    }
+  }
+
+  // 8. Fetch Students Enrolled in a Specific Course (Inside Class)
+  Future<List<dynamic>> getCourseStudents(String courseName) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/course-students/$courseName'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          return data['students'];
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching course students: $e');
+      return [];
+    }
+  }
 }
