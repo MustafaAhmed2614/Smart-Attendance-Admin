@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
-import 'screens/manage_students_screen.dart'; // Import nayi screen
+import 'screens/manage_students_screen.dart';
 
 void main() {
   runApp(const AdminApp());
@@ -19,9 +20,9 @@ class AdminApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFF4F7FE),
         textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
       ),
-      // Set initial route and routing table
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
+        '/login': (context) => const LoginScreen(),
         '/': (context) => const DashboardScreen(),
         '/manage': (context) => const ManageStudentsScreen(),
       },

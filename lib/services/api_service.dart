@@ -2,8 +2,43 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Base URL for local FastAPI backend
+  // Base URLs for local FastAPI backend
+  static const String rootUrl = 'http://127.0.0.1:8000';
   static const String baseUrl = 'http://127.0.0.1:8000/admin';
+
+  // 0. Login User (Admin, Teacher, or Student)
+  Future<Map<String, dynamic>> login(
+    String username,
+    String password, {
+    String? role,
+  }) async {
+    try {
+      final Map<String, dynamic> bodyData = {
+        'username': username.trim(),
+        'password': password,
+      };
+      if (role != null && role.isNotEmpty) {
+        bodyData['role'] = role.toLowerCase();
+      }
+
+      final response = await http.post(
+        Uri.parse('$rootUrl/login/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(bodyData),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {
+          'status': 'Error',
+          'message': 'Server error: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      throw Exception('Error connecting to backend: $e');
+    }
+  }
 
   // 1. Fetch Dashboard Stats
   Future<Map<String, dynamic>> getDashboardStats() async {
@@ -170,6 +205,112 @@ class ApiService {
     } catch (e) {
       print('Error fetching defaulters: $e');
       return [];
+    }
+  }
+
+  // 10. Fetch Courses Assigned to a Teacher
+  Future<List<String>> getTeacherCourses(String username) async {
+    try {
+      final encodedUser = Uri.encodeComponent(username.trim());
+      final response = await http.get(
+        Uri.parse('$rootUrl/teacher-courses/$encodedUser'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'Success') {
+          return List<String>.from(data['courses']);
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching teacher courses: $e');
+      return [];
+    }
+  }
+
+  // 11. Fetch Course Attendance Sessions (Dates)
+  Future<List<String>> getCourseSessions(String courseName) async {
+    try {
+      final encodedCourse = Uri.encodeComponent(courseName.trim());
+      final response = await http.get(
+        Uri.parse('$rootUrl/course-sessions/$encodedCourse'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'Success') {
+          return List<String>.from(data['sessions']);
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching course sessions: $e');
+      return [];
+    }
+  }
+
+  // 12. Fetch Attendance by Course & Date (or Today's Daily Attendance)
+  Future<Map<String, dynamic>> getAttendanceByDate(
+    String courseName,
+    String date,
+  ) async {
+    try {
+      final encodedCourse = Uri.encodeComponent(courseName.trim());
+      final response = await http.get(
+        Uri.parse('$rootUrl/attendance-by-date/$encodedCourse/$date'),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return {'status': 'Error', 'attendance_list': []};
+    } catch (e) {
+      print('Error fetching attendance by date: $e');
+      return {'status': 'Error', 'attendance_list': []};
+    }
+  }
+
+  // 13. Manually Toggle Student Attendance (Present / Absent)
+  Future<Map<String, dynamic>> toggleManualAttendance({
+    required String rollNumber,
+    required String courseName,
+    required String status,
+    required String date,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$rootUrl/toggle-attendance/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'roll_number': rollNumber,
+          'course_name': courseName.trim(),
+          'status': status,
+          'date': date,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return {'status': 'Error', 'message': 'Server error'};
+    } catch (e) {
+      return {'status': 'Error', 'message': e.toString()};
+    }
+  }
+
+  // 14. Fetch Logged-in Student Attendance History
+  Future<Map<String, dynamic>> getMyAttendance(String rollNumber) async {
+    try {
+      final encodedRoll = Uri.encodeComponent(rollNumber.trim());
+      final response = await http.get(
+        Uri.parse('$rootUrl/my-attendance/$encodedRoll'),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return {
+        'status': 'Error',
+        'message': 'Server error: ${response.statusCode}',
+      };
+    } catch (e) {
+      return {'status': 'Error', 'message': e.toString()};
     }
   }
 }

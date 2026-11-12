@@ -1,103 +1,152 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/students_list_screen.dart';
 import '../screens/courses_screen.dart';
 import '../screens/reports_screen.dart';
-import '../screens/defaulter_screen.dart'; // 👈 Defaulters screen import
+import '../screens/defaulter_screen.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+    } catch (_) {}
+
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 260,
       color: const Color(0xFF1B2559),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // App Logo / Title Header
-          Padding(
-            padding: const EdgeInsets.all(30.0),
-            child: Row(
-              children: const [
-                Icon(Icons.admin_panel_settings, color: Colors.white, size: 28),
-                SizedBox(width: 12),
-                Text(
-                  'Admin Portal',
-                  style: TextStyle(
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // App Logo / Title Header
+            Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: Row(
+                children: const [
+                  Icon(
+                    Icons.admin_panel_settings,
                     color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    size: 28,
                   ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(color: Colors.white24, height: 1),
-          const SizedBox(height: 20),
-
-          // Navigation Links
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                _buildSidebarItem(
-                  context,
-                  icon: Icons.dashboard_rounded,
-                  title: 'Dashboard',
-                  destination: const DashboardScreen(),
-                ),
-                _buildSidebarItem(
-                  context,
-                  icon: Icons.people_alt_rounded,
-                  title: 'Students List',
-                  destination: const StudentsListScreen(),
-                ),
-                _buildSidebarItem(
-                  context,
-                  icon: Icons.book_rounded,
-                  title: 'Courses',
-                  destination: const CoursesScreen(),
-                ),
-                _buildSidebarItem(
-                  context,
-                  icon: Icons.assessment_rounded,
-                  title: 'Attendance Reports',
-                  destination: const ReportsScreen(),
-                ),
-                _buildSidebarItem(
-                  context,
-                  icon: Icons.warning_amber_rounded,
-                  title: 'Defaulters',
-                  destination: const DefaultersScreen(),
-                ),
-              ],
-            ),
-          ),
-
-          // Bottom Logout / Footer Section
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: const [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.white24,
-                  child: Icon(Icons.person, color: Colors.white, size: 20),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Admin User',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
+                  SizedBox(width: 12),
+                  Text(
+                    'Admin Portal',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            const Divider(color: Colors.white24, height: 1),
+            const SizedBox(height: 20),
+
+            // Navigation Links
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildSidebarItem(
+                    context,
+                    icon: Icons.dashboard_rounded,
+                    title: 'Dashboard',
+                    destination: const DashboardScreen(),
+                  ),
+                  _buildSidebarItem(
+                    context,
+                    icon: Icons.people_alt_rounded,
+                    title: 'Students List',
+                    destination: const StudentsListScreen(),
+                  ),
+                  _buildSidebarItem(
+                    context,
+                    icon: Icons.book_rounded,
+                    title: 'Courses',
+                    destination: const CoursesScreen(),
+                  ),
+                  _buildSidebarItem(
+                    context,
+                    icon: Icons.assessment_rounded,
+                    title: 'Attendance Reports',
+                    destination: const ReportsScreen(),
+                  ),
+                  _buildSidebarItem(
+                    context,
+                    icon: Icons.warning_amber_rounded,
+                    title: 'Defaulters',
+                    destination: const DefaultersScreen(),
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(color: Colors.white24, height: 1),
+
+            // Bottom User & Logout Section
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+              child: Column(
+                children: [
+                  Row(
+                    children: const [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white24,
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'Admin User',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.redAccent,
+                        side: const BorderSide(color: Colors.redAccent),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () => _logout(context),
+                      icon: const Icon(Icons.logout_rounded, size: 18),
+                      label: const Text(
+                        'Logout',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
